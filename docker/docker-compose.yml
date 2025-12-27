@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: planner-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: planner_db
+      MYSQL_USER: planner_user
+      MYSQL_PASSWORD: planner_pass
+    ports:
+      - "3307:3306"  # Change host port to 3307
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - planner-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: planner-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - planner-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Spring Boot App (Uncomment when ready to run in Docker)
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/Dockerfile
+  #   container_name: planner-app
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   environment:
+  #     SPRING_PROFILES_ACTIVE: dev
+  #     SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/planner_db
+  #     SPRING_DATASOURCE_USERNAME: planner_user
+  #     SPRING_DATASOURCE_PASSWORD: planner_pass
+  #     SPRING_REDIS_HOST: redis
+  #     SPRING_REDIS_PORT: 6379
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - planner-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  planner-network:
+    driver: bridge
