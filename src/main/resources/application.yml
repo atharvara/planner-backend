@@ -17,6 +17,7 @@ spring:
 
   jpa:
     hibernate:
+
       ddl-auto: validate
     show-sql: true
     properties:
@@ -69,19 +70,17 @@ spring:
     properties:
       org:
         quartz:
-          scheduler:
-            instanceName: PlannerScheduler
-            instanceId: AUTO
-          jobStore:
-            class: org.quartz.impl.jdbcjobstore.JobStoreTX
-            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
-            useProperties: false
-            tablePrefix: QRTZ_
-            isClustered: false
-          threadPool:
-            class: org.quartz.simpl.SimpleThreadPool
-            threadCount: 5
-            threadPriority: 5
+          job-store-type: memory  # Changed from 'jdbc' to 'memory'
+          properties:
+            org:
+              quartz:
+                scheduler:
+                  instanceName: PlannerScheduler
+                  instanceId: AUTO
+                threadPool:
+                  class: org.quartz.simpl.SimpleThreadPool
+                  threadCount: 5
+                  threadPriority: 5
 # JWT Configuration
 # IMPORTANT: Generate your own secret using: openssl rand -base64 32
 # This secret should be at least 256 bits (32 bytes) for HS512 algorithm
@@ -137,3 +136,8 @@ notification:
     from: ${EMAIL_FROM:noreply@planner.com}
   console:
     enabled: true
+
+app:
+  seeder:
+    enabled: ${SEEDER_ENABLED:true}  # Set to false in production
+    clear-existing: ${SEEDER_CLEAR:false}
