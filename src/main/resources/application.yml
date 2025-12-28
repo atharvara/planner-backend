@@ -46,7 +46,42 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 2
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USERNAME:your-email@gmail.com}
+    password: ${EMAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        transport:
+          protocol: smtp
 
+  # Quartz Scheduler Configuration
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: PlannerScheduler
+            instanceId: AUTO
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            useProperties: false
+            tablePrefix: QRTZ_
+            isClustered: false
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 5
+            threadPriority: 5
 # JWT Configuration
 # IMPORTANT: Generate your own secret using: openssl rand -base64 32
 # This secret should be at least 256 bits (32 bytes) for HS512 algorithm
@@ -95,3 +130,10 @@ services:
   mysql:
     ports:
       - "3306:3306"
+
+notification:
+  email:
+    enabled: ${EMAIL_ENABLED:false}
+    from: ${EMAIL_FROM:noreply@planner.com}
+  console:
+    enabled: true
